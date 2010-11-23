@@ -1,0 +1,33 @@
+Get-vCloud
+
+Get-vCloud is a Powershell function library for VMware's vCloud API.
+
+
+Installation
+
+1. Download the .ps1 (or zip file) from GitHub and place in the folder of your choice.
+2. Import the functions using "dot-sourcing" like so:
+
+	. .\vcloud-functions.ps1
+
+3. Profit!
+
+
+The Functions
+
+Current "cmdlets" are:
+
+Get-vCloudvDC
+Get-vCloudvApp
+Get-vCloudVM
+Connect-vCloud
+Disconnect-vCloud
+Get-vCloudURI
+Post-vCloudURI
+
+
+HELP!
+
+For help on using the functions:
+
+	get-help <cmdlet>
