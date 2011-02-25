@@ -17,13 +17,19 @@ The Functions
 
 Current "cmdlets" are:
 
-Get-vCloudvDC
-Get-vCloudvApp
-Get-vCloudVM
 Connect-vCloud
+Delete-vCloudURI
 Disconnect-vCloud
+Get-vCloudCatalog
+Get-vCloudNetwork
+Get-vCloudOrg
 Get-vCloudURI
+Get-vCloudvApp
+Get-vCloudvDC
+Get-vCloudVM
 Post-vCloudURI
+PowerOff-vCloudVM
+PowerOn-vCloudVM
 
 
 HELP!
