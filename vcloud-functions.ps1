@@ -665,6 +665,7 @@ function Get-vCloudNetwork
     param
     (
         [parameter(ValueFromPipeline=$true)]
+        [alias("org")]
         [PSObject]$orgURI,
         
         [parameter(mandatory=$false,Position=0)]
@@ -707,15 +708,15 @@ function Get-vCloudCatalog
 {
     <#
         .SYNOPSIS
-        Get-vCloudvDC lists catalogs within an org.
+        Get-vCloudCatalog lists catalogs within an org.
 
 
         .DESCRIPTION
-        Get-vCloudvDC lists catalogs within an org.
+        Get-vCloudCatalog lists catalogs within an org.
 
 
         .INPUTS
-        You can piple an org URI to Get-vCloudcatalog
+        You can piple an org URI to Get-vCloudCatalog
 
 
         .PARAMETER orgURI
@@ -723,7 +724,7 @@ function Get-vCloudCatalog
 
 
         .EXAMPLE
-        Get-vCloudcatalog
+        Get-vCloudCatalog
 
 
     #>
@@ -927,15 +928,15 @@ function Get-vCloudConsole
 {
     <#
         .SYNOPSIS
-        PowerOff-vCloudVM stops a VM.
+        Get-vCloudConsole openes the console of a VM running in a vCloud Datacenter
 
 
         .DESCRIPTION
-        PowerOff-vCloudVM stops a VM.
+        Get-vCloudConsole openes the console of a VM running in a vCloud Datacenter
 
 
         .INPUTS
-        You can pipe a vCloudVM object to PowerOff-vCloudVM.
+        You can pipe a vCloudVM object to Get-vCloudConsole.
 
 
         .PARAMETER vm
@@ -943,11 +944,11 @@ function Get-vCloudConsole
 
 
         .EXAMPLE
-        Get-vCloudVM "MyVM" | PowerOff-vCloudVM
+        Get-vCloudVM "MyVM" | Get-vCloudConsole
         
         .EXAMPLE
         $myVM = Get-vCloudVM "MyVM"
-        PowerOff-vCloudVM $myVM
+        Get-vCloudConsole $myVM
 
 
     #>
@@ -1093,15 +1094,15 @@ function Deploy-vCloudvApp
 {
     <#
         .SYNOPSIS
-        PowerOff-vCloudvApp stops a vApp.
+        Deploy-vCloudvApp stops a vApp.
 
 
         .DESCRIPTION
-        PowerOff-vCloudvApp stops a vApp.
+        Deploy-vCloudvApp stops a vApp.
 
 
         .INPUTS
-        You can pipe a vCloudvApp object to PowerOff-vCloudvApp.
+        You can pipe a vCloudvApp object to Deploy-vCloudvApp.
 
 
         .PARAMETER vApp
@@ -1109,11 +1110,11 @@ function Deploy-vCloudvApp
 
 
         .EXAMPLE
-        Get-vCloudvApp "MyvApp" | PowerOff-vCloudvApp
+        Get-vCloudvApp "MyvApp" | Deploy-vCloudvApp
         
         .EXAMPLE
         $myvApp = Get-vCloudvApp "MyvApp"
-        PowerOff-vCloudvApp $myvApp
+        Deploy-vCloudvApp $myvApp
     #>
 
     [CmdletBinding()]
@@ -1143,15 +1144,15 @@ function Undeploy-vCloudvApp
 {
     <#
         .SYNOPSIS
-        PowerOff-vCloudvApp stops a vApp.
+        Undeploy-vCloudvApp stops a vApp.
 
 
         .DESCRIPTION
-        PowerOff-vCloudvApp stops a vApp.
+        Undeploy-vCloudvApp stops a vApp.
 
 
         .INPUTS
-        You can pipe a vCloudvApp object to PowerOff-vCloudvApp.
+        You can pipe a vCloudvApp object to Undeploy-vCloudvApp.
 
 
         .PARAMETER vApp
@@ -1159,11 +1160,11 @@ function Undeploy-vCloudvApp
 
 
         .EXAMPLE
-        Get-vCloudvApp "MyvApp" | PowerOff-vCloudvApp
+        Get-vCloudvApp "MyvApp" | Undeploy-vCloudvApp
         
         .EXAMPLE
         $myvApp = Get-vCloudvApp "MyvApp"
-        PowerOff-vCloudvApp $myvApp
+        Undeploy-vCloudvApp $myvApp
     #>
 
     [CmdletBinding(SupportsShouldProcess=$true,ConfirmImpact="High")]
@@ -1190,23 +1191,23 @@ function Get-vCloudvAppTemplate
 {
     <#
         .SYNOPSIS
-        Get-vCloudvDC lists catalogs within an org.
+        Get-vCloudvAppTemplate lists vAppTemplates within an org.
 
 
         .DESCRIPTION
-        Get-vCloudvDC lists catalogs within an org.
+        Get-vCloudvAppTemplate lists vAppTemplates within an org.
 
 
         .INPUTS
-        You can piple an org URI to Get-vCloudcatalog
+        You can piple an org URI to Get-vCloudvAppTemplate
 
 
-        .PARAMETER orgURI
-        The URI of the org to list the catalogs
+        .PARAMETER name
+        The name of a vAppTemplate
 
 
         .EXAMPLE
-        Get-vCloudcatalog
+        Get-vCloudvAppTemplate
     #>
 
     [CmdletBinding()]
