@@ -19,17 +19,24 @@ Current "cmdlets" are:
 
 Connect-vCloud
 Delete-vCloudURI
+Deploy-vCloudvApp
 Disconnect-vCloud
 Get-vCloudCatalog
+Get-vCloudConsole
+Get-vCloudMedia
 Get-vCloudNetwork
 Get-vCloudOrg
 Get-vCloudURI
 Get-vCloudvApp
+Get-vCloudvAppTemplate
 Get-vCloudvDC
 Get-vCloudVM
 Post-vCloudURI
+PowerOff-vCloudvApp
 PowerOff-vCloudVM
+PowerOn-vCloudvApp
 PowerOn-vCloudVM
+Undeploy-vCloudvApp
 
 
 HELP!
