@@ -974,14 +974,16 @@ function Get-vCloudConsole
             if (Test-Path "C:\Program Files (x86)\Common Files\VMware\VMware Remote Console Plug-in\vmware-vmrc.exe")
             {
                 $vmrc = "C:\Program Files (x86)\Common Files\VMware\VMware Remote Console Plug-in\vmware-vmrc.exe"
-                $vmrcArgs = "-h $($server) -p $($unencoded) -M $($moref)"
-                [void] [Diagnostics.Process]::Start($vmrc, $vmrcArgs)
+                #$vmrcArgs = "-h $($server) -p $($unencoded) -M $($moref)"
+                Start-Process -FilePath $vmrc "-h $($server) -p $($unencoded) -M $($moref)"
+                #[void] [Diagnostics.Process]::Start($vmrc, $vmrcArgs)
             }
             elseif (Test-Path "C:\Program Files\Common Files\VMware\VMware Remote Console Plug-in\vmware-vmrc.exe")
             {
                 $vmrc = "C:\Program Files\Common Files\VMware\VMware Remote Console Plug-in\vmware-vmrc.exe"
-                $vmrcArgs = "-h $($server) -p $($unencoded) -M $($moref)"
-                [void] [Diagnostics.Process]::Start($vmrc, $vmrcArgs)
+                #$vmrcArgs = "-h $($server) -p $($unencoded) -M $($moref)"
+                Start-Process -FilePath $vmrc "-h $($server) -p $($unencoded) -M $($moref)"
+                #[void] [Diagnostics.Process]::Start($vmrc, $vmrcArgs)
             }
             else {throw "VMware Remote Console plugin for IE not installed."}
         }
