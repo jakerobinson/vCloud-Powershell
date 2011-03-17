@@ -1304,3 +1304,103 @@ function Get-vCloudMedia
         return $return
     }
 }
+
+ ##########################################
+# Reset-vCloudVM
+# TODO:
+ ##########################################
+function Reset-vCloudVM
+{
+    <#
+        .SYNOPSIS
+        Reset-vCloudVM resets a VM.
+
+
+        .DESCRIPTION
+        Reset-vCloudVM resets a VM.
+
+
+        .INPUTS
+        You can pipe a vCloudVM object to Reset-vCloudVM.
+
+
+        .PARAMETER vm
+        a vcloud VM object
+
+
+        .EXAMPLE
+        Get-vCloudVM "MyVM" | Reset-vCloudVM
+        
+        .EXAMPLE
+        $myVM = Get-vCloudVM "MyVM"
+        Reset-vCloudVM $myVM
+    #>
+
+    [CmdletBinding(SupportsShouldProcess=$true,ConfirmImpact="High")]
+    param
+    (
+        [parameter(Mandatory=$true,ValueFromPipeline=$true,Position=0)]
+        [PSObject]$vm
+    )
+    PROCESS
+    {
+        if ($pscmdlet.ShouldProcess($vm.name))
+        {
+            if ($vm)
+            {
+                $resetLink = ($vm.link | where {$_.rel -eq "power:reset"}).href
+                return (Post-vCloudURI $resetLink).xmldata.task
+            }
+        }
+    }
+}
+
+ ##########################################
+# Reboot-vCloudVM
+# TODO:
+ ##########################################
+function Reboot-vCloudVM
+{
+    <#
+        .SYNOPSIS
+        Reboot-vCloudVM Reboots a VM.
+
+
+        .DESCRIPTION
+        Reboot-vCloudVM Reboots a VM.
+
+
+        .INPUTS
+        You can pipe a vCloudVM object to Reboot-vCloudVM.
+
+
+        .PARAMETER vm
+        a vcloud VM object
+
+
+        .EXAMPLE
+        Get-vCloudVM "MyVM" | Reboot-vCloudVM
+        
+        .EXAMPLE
+        $myVM = Get-vCloudVM "MyVM"
+        Reboot-vCloudVM $myVM
+    #>
+
+    [CmdletBinding(SupportsShouldProcess=$true,ConfirmImpact="High")]
+    param
+    (
+        [parameter(Mandatory=$true,ValueFromPipeline=$true,Position=0)]
+        [PSObject]$vm
+    )
+    PROCESS
+    {
+        if ($pscmdlet.ShouldProcess($vm.name))
+        {
+            if ($vm)
+            {
+                $rebootLink = ($vm.link | where {$_.rel -eq "power:Reboot"}).href
+                Post-vCloudURI $rebootLink
+            }
+        }
+    }
+}
