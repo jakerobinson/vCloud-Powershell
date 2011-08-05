@@ -29,9 +29,9 @@ function Connect-vCloud
       b. The session is idle and times out (30 minutes)
     
     Required parameters are:
-      1. The URL of the vCloud API you are connecting to. This URL can typically be found by browsing to https://vCloudAPIserver/api/versions
+      1. The server name.
       2. Your username.
-      3. The org you are connecting to. (These functions currently only support connecting to a single org.
+      3. The org you are connecting to. (These functions currently only support connecting to a single org.)
       4. Your password.
 
     .INPUTS
@@ -40,7 +40,7 @@ function Connect-vCloud
 
     .PARAMETER uri
 
-    The URI of the vCloud API in the form of https://vCloudServer.mydomain.com/api/v1.0/
+    The URI of the vCloud API in the form of vCloudServer.mydomain.com
 
     .PARAMETER username
 
@@ -62,13 +62,13 @@ function Connect-vCloud
 
     Connect to vCloud API with username and password
 
-    Connect-vCloud -uri "https://vCloudserver.mydomain.com/api/v1.0/" -username sarahconnor -org skynet -password hastalavista
+    Connect-vCloud -uri vCloudserver.mydomain.com -username sarahconnor -org skynet -password hastalavista
 
     .EXAMPLE
     
     Connect to vCloud API using Powershell Credential
 
-    Connect-vCloud "https://vCloudserver.mydomain.com/api/v1.0/" -credential (get-credential) -org skynet
+    Connect-vCloud vCloudserver.mydomain.com -credential (get-credential) -org skynet
     
     
 
@@ -77,23 +77,22 @@ function Connect-vCloud
     [CmdletBinding()]
     param
     (
-        [parameter(Mandatory=$true,Position=0)]
-        [ValidatePattern('^(https)[\S]+/')]
+        [parameter(Position=0)]
         [alias("url")]
-        [string[]]$uri,
+        [string]$uri,
         
-        [parameter(Mandatory=$false)]
+        [parameter()]
         [alias("user")]
-        [string[]]$username,
+        [string]$username,
         
-        [parameter(Mandatory=$false)]
-        [string[]]$org,
+        [parameter()]
+        [string]$org,
         
-        [parameter(Mandatory=$false)]
+        [parameter()]
         [alias("pass")]
-        [string[]]$password,
+        [string]$password,
         
-        [parameter(Mandatory=$false)]
+        [parameter()]
         [alias("cred")]
         [System.Management.Automation.PSCredential]$credential
     )
@@ -105,10 +104,9 @@ function Connect-vCloud
             $global:connection = new-object PSObject
             add-member -membertype NoteProperty -inputobject $global:connection -name "connectedTo" -value $uri
         
-            $request = [System.Net.HttpWebRequest]::Create("$($global:connection.connectedto)login")
+            $request = [System.Net.HttpWebRequest]::Create("https://$($global:connection.connectedto)/api/v1.0/login")
             if ($credential)
             {
-                #[System.Net.NetworkCredential]$netCred = $credential
                 $netcred = $credential.GetNetworkCredential()
                 if ($org)
                 {
@@ -262,7 +260,15 @@ function Post-vCloudURI
         [System.URI]$uri,
         
         [parameter(Mandatory=$false)]
-        [String]$returnString
+        [String]$returnString,
+        
+        [parameter(Mandatory=$false)]
+        [xml]$postData,
+        
+        [parameter(Mandatory=$false)]
+        [String]$contentType
+        
+        
     )
     PROCESS
     {
@@ -276,19 +282,31 @@ function Post-vCloudURI
             $request = [System.Net.WebRequest]::Create($uri);
             $request.Headers.Add("x-vCloud-authorization",$global:connection.token)
             $request.Method="POST"
+            if ($postData -and $contentType)
+            {
+                $request.ContentType = $contentType
+                #build our content from xml
+                $xmlString = $postData
+                $xmlEnc = [System.Text.Encoding]::UTF8.GetBytes($xmlString)
+                $request.ContentLength = $xmlEnc.length
+                $requestStream = $request.GetRequestStream()
+                $requestStream.write($xmlEnc, 0, $xmlEnc.Length)
+                $requestStream.Close()
+            }
+        
             add-member -membertype NoteProperty -inputobject $responseObj -name "response" -value $request.GetResponse()
             
             $responseStream = $responseObj.response.getResponseStream()
             $streamReader = new-object System.IO.StreamReader($responseStream)
         
-        if ($returnString)
-        {
-            $result = $streamReader.ReadtoEnd()
-        }
-        else
-        {
-            [xml]$result = $streamReader.ReadtoEnd()
-        }
+            if ($returnString)
+            {
+                $result = $streamReader.ReadtoEnd()
+            }
+            else
+            {
+                [xml]$result = $streamReader.ReadtoEnd()
+            }
     
         add-member -membertype NoteProperty -inputobject $responseObj -name "xmldata" -value $result
     
@@ -393,35 +411,31 @@ function Get-vCloudVM
 
 
         .DESCRIPTION
-        Get-vCloudVM lists VMs within an vApp. If there is no input, it lists all VMs within an org.
+        Get-vCloudVM lists VMs within an vApp. Since only connecting to one vApp is supported at this time, Get-vCloudVM uses the vApp URI from the connection variable.
 
 
-        .INPUTS vApp
-        You can pipe a vApp object to get-vCloudVM
+        .INPUTS
+        You can piple an vApp URI to Get-vCloudVM
 
 
-        .PARAMETER vApp
-        a vApp object returned from get-vCloudvApp
+        .PARAMETER vAppURI
+        The URI of the vApp to list the VMs
 
 
         .EXAMPLE
-        get-vCloudVM
+        Get-vCloudVM
 
 
     #>
-    
-    
-    
-
 
     [CmdletBinding()]
     param
     (
         [parameter(ValueFromPipeline=$true)]
-        [PSObject]$vappObject,
+        $vappObject,
         
         [parameter(mandatory=$false,Position=0)]
-        [PSObject]$name
+        [String]$name
     )
     PROCESS
     {
@@ -493,7 +507,7 @@ function Get-vCloudvDC
         [PSObject]$orgURI,
         
         [parameter(mandatory=$false,Position=0)]
-        [PSObject]$name
+        [String]$name
     )
     PROCESS
     {
@@ -549,7 +563,7 @@ function Disconnect-vCloud()
     
         if ($global:connection)
         {
-            $result = Post-vCloudURI "$($global:connection.connectedto)logout" -returnString $true
+            $result = Post-vCloudURI "https://$($global:connection.connectedto)/api/v1.0/logout" -returnString $true
         
             if ($result.response.Statuscode -eq "OK")
             {
@@ -736,7 +750,7 @@ function Get-vCloudCatalog
         [PSObject]$orgURI,
         
         [parameter(mandatory=$false,Position=0)]
-        [PSObject]$name
+        [String]$name
     )
     PROCESS
     {
@@ -1220,7 +1234,7 @@ function Get-vCloudvAppTemplate
         [PSObject]$CatalogObj,
         
         [parameter(mandatory=$false,Position=0)]
-        [PSObject]$name
+        [String]$name
     )
     PROCESS
     {
@@ -1254,15 +1268,15 @@ function Get-vCloudMedia
 {
     <#
         .SYNOPSIS
-        Get-vCloudvDC lists catalogs within an org.
+        Get-vCloudMedia lists Media in a Catalog.
 
 
         .DESCRIPTION
-        Get-vCloudvDC lists catalogs within an org.
+        Get-vCloudMedia lists Media in a Catalog.
 
 
         .INPUTS
-        You can piple an org URI to Get-vCloudcatalog
+        You can piple a catalog URI to Get-vCloudMedia
 
 
         .PARAMETER orgURI
@@ -1270,7 +1284,7 @@ function Get-vCloudMedia
 
 
         .EXAMPLE
-        Get-vCloudcatalog
+        Get-vCloudMedia
     #>
 
     [CmdletBinding()]
@@ -1281,7 +1295,7 @@ function Get-vCloudMedia
         [PSObject]$CatalogObj,
         
         [parameter(mandatory=$false,Position=0)]
-        [PSObject]$name
+        [String]$name
     )
     PROCESS
     {
