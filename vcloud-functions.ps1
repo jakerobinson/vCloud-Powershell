@@ -99,6 +99,11 @@ function Connect-vCloud
     PROCESS
     {
         # we have to convert the password to plaintext. :(
+        
+        if (!$username -or !$password -or !$org -or !$credential)
+        {
+            $credential = get-credential
+        }
         try
         {
             $global:connection = new-object PSObject
@@ -287,9 +292,9 @@ function Post-vCloudURI
                 $request.ContentType = $contentType
                 #build our content from xml
                 $xmlString = $postData
-                $xmlEnc = [System.Text.Encoding]::UTF8.GetBytes($xmlString)
+                [byte[]]$xmlEnc = [System.Text.Encoding]::UTF8.GetBytes($xmlString)
                 $request.ContentLength = $xmlEnc.length
-                $requestStream = $request.GetRequestStream()
+                [System.IO.Stream]$requestStream = $request.GetRequestStream()
                 $requestStream.write($xmlEnc, 0, $xmlEnc.Length)
                 $requestStream.Close()
             }
@@ -391,10 +396,12 @@ function Get-vCloudvApp
         $vAppArray = @()
         ForEach ($vAppURI in $vAppURIs)
         {
-            $vApp = Get-vCloudURI $vAppURI.href
-            $vAppArray += $vApp.xmldata.vapp
+            if ($vAppURI.href)
+            {
+                $vApp = Get-vCloudURI $vAppURI.href
+                $vAppArray += $vApp.xmldata.vapp
+            }
         }
-        
         return $vAppArray
     }
 }

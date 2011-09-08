@@ -1,7 +1,8 @@
-Get-vCloud
+vCloud Powershell function library for VMware's vCloud API.
 
-Get-vCloud is a Powershell function library for VMware's vCloud API.
+THIS WILL SOON BE DEPRECATED!
 
+SEE THIS POST: http://geekafterfive.com/2011/09/06/vmware-vcloud-powercli-snapin/
 
 Installation
 
