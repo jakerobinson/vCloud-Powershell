@@ -326,6 +326,115 @@ function Post-vCloudURI
         return $responseObj
     }
 }
+ ######################################################
+# Put-vCloudURI
+ ######################################################
+function Put-vCloudURI
+{
+    <#
+        .SYNOPSIS
+        Performs a HTTP Post request to the vCloud API. Returns the response data and the XML content of the response.
+
+
+        .DESCRIPTION
+        Post-vCloudURI does the HTTP Post requests to the vCloud API. It returns the HTTP response and the content of the response.
+        
+        All other functions requiring HTTP POST requests should call Post-vCloudURI.
+        
+        HTTP POST functions are commonly used for performing an action against something (eg PowerOff, PowerOn)
+
+
+        .INPUTS
+        You can pipe a URI to Post-vCloudURI
+
+
+        .PARAMETER uri
+        The URI to perform the POST request.
+
+
+        .EXAMPLE
+        
+        Powering up a vApp:
+        
+        Post-vCloudURI "https://vCloudserver.mycompany.com/vapi/1.0/vApp/vapp-12345/power/action/poweron"
+
+
+    #>
+    
+    [CmdletBinding()]
+    param
+    (
+        [parameter(Mandatory=$true,ValueFromPipeline=$true,Position=0)]
+        [ValidatePattern('^(http|https)')]
+        [alias("url")]
+        [System.URI]$uri,
+        
+        [parameter(Mandatory=$false)]
+        [String]$returnString,
+        
+        [parameter(Mandatory=$false)]
+        $postData,
+        
+        [parameter(Mandatory=$false)]
+        [String]$contentType
+        
+        
+    )
+    PROCESS
+    {
+    
+        if($debugvCloud){write-host -foregroundcolor cyan $uri}
+        
+        try
+        {
+            $responseObj = new-object PSObject
+
+            $request = [System.Net.WebRequest]::Create($uri);
+            $request.Headers.Add("x-vCloud-authorization",$global:connection.token)
+            $request.Method="PUT"
+            if ($postData -and $contentType)
+            {
+                $request.ContentType = $contentType
+                #build our content from xml
+                write-host -ForegroundColor magenta $postData
+                #adding strings to xml puts in silly newlines. 
+                $xmlString = $postData.replace("&#xA;","")
+                write-host -foregroundcolor magenta $xmlstring
+                [byte[]]$xmlEnc = [System.Text.Encoding]::UTF8.GetBytes($xmlString)
+                write-host -ForegroundColor magenta $xmlEnc
+                $request.ContentLength = $xmlEnc.length
+                [System.IO.Stream]$requestStream = $request.GetRequestStream()
+                $requestStream.write($xmlEnc, 0, $xmlEnc.Length)
+                $requestStream.Close()
+            }
+        
+            add-member -membertype NoteProperty -inputobject $responseObj -name "response" -value $request.GetResponse()
+            
+            $responseStream = $responseObj.response.getResponseStream()
+            $streamReader = new-object System.IO.StreamReader($responseStream)
+        
+            if ($returnString)
+            {
+                $result = $streamReader.ReadtoEnd()
+            }
+            else
+            {
+                [xml]$result = $streamReader.ReadtoEnd()
+            }
+    
+        add-member -membertype NoteProperty -inputobject $responseObj -name "xmldata" -value $result
+    
+        $streamReader.close()
+        $responseObj.response.close()
+        }
+        
+        catch [Net.WebException]
+        {
+            return(write-host -ForegroundColor red $_.exception.message)
+        }
+        return $responseObj
+    }
+}
 
  ###################################################
 # Get-vCloudvApp
@@ -520,10 +629,10 @@ function Get-vCloudvDC
     {
         if (!$orgURI)
         {
-            $orgURI = $global:connection.org.href
+            $orgURI = Get-vCloudOrg
         }
         
-        $result = get-vCloudURI $orgURI
+        $result = $orgURI | ForEach-Object {get-vCloudURI $_.href}
         if($name)
         {
             $vdcURI = $result.xmldata.org.link | where {$_.type -eq "application/vnd.vmware.vCloud.vdc+xml"} | where {$_.name -eq $name} | select name,href
